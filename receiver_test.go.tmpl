@@ -1,0 +1,46 @@
+package benchmark
+
+import (
+	"testing"
+)
+
+{{with $max := .Env.Max}}
+
+type (
+{{range $i := seq $max}}
+	W{{$i}} struct {
+		A [{{$i}}]int64
+	}
+{{- end}}
+)
+
+{{range $i := seq $max}}
+func (w W{{$i}}) ByValue() W{{$i}} {
+	return w
+}
+
+func (w *W{{$i}}) ByPointer() *W{{$i}} {
+	return w
+}
+
+{{end}}
+
+{{range $i := seq $max}}
+func BenchmarkValueReceiverW{{$i}}(b *testing.B) {
+	w := W{{$i}}{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = w.ByValue()
+	}
+}
+
+func BenchmarkPointerReceiverW{{$i}}(b *testing.B) {
+	w := W{{$i}}{}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = w.ByPointer()
+	}
+}
+
+{{end}}
+{{end}}
